@@ -17,7 +17,7 @@
 #define BTN_OPEN_CLOSE_PIN 12
 
 #define LED_BTN_MODE_PIN 13
-#define LED_BTN_OPEN_CLOSE_PIN 14
+#define LED_BTN_GATE_PIN 14
 
 #define RELAY_PIN 14
 
@@ -28,6 +28,5 @@
   /* --- Déclaration des constantes --- */
 
 #define NB_MAX_MODE 4
-#define TIME_MAX_SIGNAL_RELAY 1000
 #define NB_MAX_TENTATIVE 3
 #define DELAY_TENTATIVE 30000

@@ -9,79 +9,7 @@
 
 #include <Arduino.h>
 #include "utils.h"
-
-// ***********************************************************************
-// **********************    Création des objets     *********************
-// ***********************************************************************
-
-// ***********************************************************************
-// ******************    Declarations des fonctions     ******************
-// ***********************************************************************
-
-void read_input_btn()
-{
-
-    if (digitalRead(BTN_MODE_PIN))
-    {
-        Serial.print("BTN_MODE_PIN : HIGH");
-        operating_mode++;
-        overflow(operating_mode, 0, NB_MAX_MODE);
-    }
-
-    if (digitalRead(BTN_OPEN_CLOSE_PIN))
-    {
-        Serial.print("BTN_OPEN_CLOSE_PIN : HIGH");
-        relay_signal = HIGH;
-        start_time_relay = millis();
-    }
-}
-
-void manage_gate(unsigned long delay)
-{
-
-    if (digitalRead(END_STOP_CLOSE_PIN) == HIGH)
-    {
-        start_time_close = millis();
-        tentative = 0;
-        return;
-    }
-
-    if (tentative > 0)
-        delay = DELAY_TENTATIVE;
-    else
-        delay = delay * 60000;
-
-    elapsed_time_close = millis() - start_time_close;
-    if (elapsed_time_close > delay * 60000)
-        return;
-
-    tentative++;
-    if (tentative > NB_MAX_TENTATIVE)
-    {
-        operating_mode = 5;
-        return;
-    }
-
-    relay_signal = HIGH;
-    start_time_close = millis();
-}
-
-void manage_relay()
-{
-    if (relay_signal != HIGH)
-        return;
-
-    elapsed_time_relay = millis() - start_time_relay;
-    if (elapsed_time_relay < TIME_MAX_SIGNAL_RELAY)
-    {
-        digitalWrite(RELAY_PIN, HIGH);
-    }
-    else
-    {
-        digitalWrite(RELAY_PIN, LOW);
-        relay_signal = LOW;
-    }
-}
+#include "fonctions.h"
 
 // ***********************************************************************
 // ***********************     FONCTION SETUP     ************************
@@ -94,17 +22,36 @@ void setup()
     pinMode(LED_MODE2_PIN, OUTPUT);
     pinMode(LED_MODE3_PIN, OUTPUT);
     pinMode(LED_MODE4_PIN, OUTPUT);
+    pinMode(LED_BTN_MODE_PIN, OUTPUT);
+    pinMode(LED_BTN_GATE_PIN, OUTPUT);
 
     pinMode(END_STOP_OPEN_PIN, INPUT);
     pinMode(END_STOP_CLOSE_PIN, INPUT);
-
     pinMode(BTN_MODE_PIN, INPUT);
     pinMode(BTN_OPEN_CLOSE_PIN, INPUT);
 
-    pinMode(LED_BTN_MODE_PIN, OUTPUT);
-    pinMode(LED_BTN_OPEN_CLOSE_PIN, OUTPUT);
+    for (byte i = 0; i < 3; i++)
+    {
+        // au demmarrage on controle si toutes les led fonctionnent en les faisant clignoter 3 fois
+        digitalWrite(LED_MODE1_PIN, HIGH);
+        digitalWrite(LED_MODE2_PIN, HIGH);
+        digitalWrite(LED_MODE3_PIN, HIGH);
+        digitalWrite(LED_MODE4_PIN, HIGH);
+        digitalWrite(LED_BTN_MODE_PIN, HIGH);
+        digitalWrite(LED_BTN_GATE_PIN, HIGH);
+        delay(400)
+        digitalWrite(LED_MODE1_PIN, LOW);
+        digitalWrite(LED_MODE2_PIN, LOW);
+        digitalWrite(LED_MODE3_PIN, LOW);
+        digitalWrite(LED_MODE4_PIN, LOW);
+        digitalWrite(LED_BTN_MODE_PIN, HIGH);
+        digitalWrite(LED_BTN_GATE_PIN, HIGH);
+        delay(400)
+    }
+    
 
     start_time_close = millis();
+    start_time_blink_led_btn_gate = millis();
 }
 
 // ***********************************************************************
@@ -115,7 +62,6 @@ void loop()
 {
 
     read_input_btn();
-    manage_relay();
 
     switch (operating_mode)
     {
@@ -131,7 +77,7 @@ void loop()
         digitalWrite(LED_MODE2_PIN, LOW);
         digitalWrite(LED_MODE3_PIN, LOW);
         digitalWrite(LED_MODE4_PIN, LOW);
-        manage_gate(5);
+        management_input_endstop(5);
         break;
 
     case 2:
@@ -139,7 +85,7 @@ void loop()
         digitalWrite(LED_MODE2_PIN, HIGH);
         digitalWrite(LED_MODE3_PIN, LOW);
         digitalWrite(LED_MODE4_PIN, LOW);
-        manage_gate(30);
+        management_input_endstop(30);
         break;
 
     case 3:
@@ -147,7 +93,7 @@ void loop()
         digitalWrite(LED_MODE2_PIN, LOW);
         digitalWrite(LED_MODE3_PIN, HIGH);
         digitalWrite(LED_MODE4_PIN, LOW);
-        manage_gate(60);
+        management_input_endstop(60);
         break;
 
     case 4:
@@ -155,7 +101,7 @@ void loop()
         digitalWrite(LED_MODE2_PIN, LOW);
         digitalWrite(LED_MODE3_PIN, LOW);
         digitalWrite(LED_MODE4_PIN, HIGH);
-        manage_gate(24 * 60);
+        management_input_endstop(60);
         break;
 
     case 5:

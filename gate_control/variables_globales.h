@@ -1,14 +1,14 @@
 // ***********************************************************************
 // ******************    Déclaration des variables     *******************
 // ***********************************************************************
- 
+
 byte operating_mode = 0;
-
-bool relay_signal = LOW;
-unsigned long start_time_relay;
-unsigned long elapsed_time_relay;
-
 unsigned long start_time_close;
-unsigned long elapsed_time_close;
 
-byte tentative=0;
+//btn gate
+bool state_led_btn_gate = LOW;
+unsigned int delay_blink_led_btn_gate = 800;
+unsigned long start_time_blink_led_btn_gate;
+
+
+byte close_tentative = 0;
