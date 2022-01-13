@@ -6,7 +6,7 @@ void send_signal_relay()
     digitalWrite(RELAY_PIN, LOW);
 }
 
-void close_gate(unsigned long delay)
+bool close_gate(unsigned long delay)
 {
     // on sort de la fonction si le delai nest pas depassé
     unsigned long elapsed_time = millis() - start_time_close;
